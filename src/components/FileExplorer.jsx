@@ -5,7 +5,7 @@ import TreeNode from './TreeNode';
 import FileContent from './FileContent';
 
 const FileExplorer = () => {
-  const { fileSystem, createFile, deleteItem, renameItem, findNodeById, moveItem } = useFileSystem();
+  const { fileSystem, createFile, deleteItem, renameItem, findNodeById, moveItem, updateFileContent } = useFileSystem();
   const [searchTerm, setSearchTerm] = useState("");
   const [sidebarWidth, setSidebarWidth] = useState(300);
 
@@ -22,6 +22,9 @@ const FileExplorer = () => {
         break;
       case 'move':
         moveItem(...args);
+        break;
+      case 'updateContent':
+        updateFileContent(...args);
         break;
       default:
         break;
@@ -65,7 +68,7 @@ const FileExplorer = () => {
       <div className="resizer" onMouseDown={handleMouseDown}></div>
       <div className="file-explorer-content" style={{ width: `calc(100% - ${sidebarWidth}px)` }}>
         <Routes>
-          <Route path="/file/:fileId" element={<FileContent findNodeById={findNodeById} />} />
+          <Route path="/file/:fileId" element={<FileContent findNodeById={findNodeById} onFileOperation={handleFileOperation} />} />
           <Route path="/" element={<div className="file-explorer-message">Select a file to view its content.</div>} />
         </Routes>
       </div>

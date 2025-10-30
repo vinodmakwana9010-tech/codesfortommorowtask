@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import FolderIcon from '../../FolderIcon';
 import FileIcon from '../../FileIcon';
 import CreateFileIcon from '../../CreateFileIcon';
@@ -129,6 +129,8 @@ const TreeNode = ({ node, onFileOperation, level = 0, searchTerm = "" }) => {
     return null;
   }
 
+  const isActive = node.type === 'file' && location.pathname === `/file/${node.id}`;
+
   return (
     <div
       style={{ paddingLeft: `${level * 20}px` }}
@@ -137,7 +139,7 @@ const TreeNode = ({ node, onFileOperation, level = 0, searchTerm = "" }) => {
       onDragStart={handleDragStart}
     >
       <div
-        className={`tree-node-item ${isDropTarget ? 'drop-target' : ''}`}
+        className={`tree-node-item ${isDropTarget ? 'drop-target' : ''} ${isActive ? 'active' : ''}`}
         onDragOver={handleDragOver}
         onDragEnter={handleDragEnter}
         onDragLeave={handleDragLeave}
