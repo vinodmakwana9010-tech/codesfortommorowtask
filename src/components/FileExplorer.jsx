@@ -1,42 +1,39 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
-import { useSelector, useDispatch } from 'react-redux';
-import { createFile, deleteItem, renameItem, moveItem, copyItem, updateFileContent } from './fileSystemSlice';
-import FileContent from './FileContent';
+import { useFileSystem } from '../useFileSystem';
 import TreeNode from './TreeNode';
+import FileContent from './FileContent';
 
 const FileExplorer = () => {
-  const fileSystem = useSelector((state) => state.fileSystem);
-  const dispatch = useDispatch();
+  const { fileSystem, createFile, deleteItem, renameItem, findNodeById, moveItem, copyItem, updateFileContent } = useFileSystem() || {};
   const [searchTerm, setSearchTerm] = useState("");
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [clipboard, setClipboard] = useState(null); // { sourceId: string, operation: 'copy' | 'cut' }
   const [sidebarWidth, setSidebarWidth] = useState(280);
 
   const handleFileOperation = (operation, ...args) => {
-    const payload = args;
     switch (operation) {
       case 'create':
-        dispatch(createFile({ parentId: payload[0], name: payload[1], type: payload[2] }));
+        createFile(...args);
         break;
       case 'delete':
-        dispatch(deleteItem(payload[0]));
+        deleteItem(...args);
         break;
       case 'rename':
-        dispatch(renameItem({ nodeId: payload[0], newName: payload[1] }));
+        renameItem(...args); 
         break;
       case 'move':
-        dispatch(moveItem({ sourceId: payload[0], destinationId: payload[1] }));
+        moveItem(...args);
         setClipboard(null); // Clear clipboard after move
         break;
       case 'copy':
-        dispatch(copyItem({ sourceId: payload[0], destinationId: payload[1] }));
+        copyItem(...args);
         break;
       case 'update':
-        dispatch(updateFileContent({ fileId: payload[0], content: payload[1] }));
+        updateFileContent(...args);
         break;
       case 'updateContent':
-        dispatch(updateFileContent({ fileId: payload[0], content: payload[1] }));
+        updateFileContent(...args);
         break;
       default:
         break;
@@ -98,7 +95,7 @@ const FileExplorer = () => {
       {isSidebarOpen && <div className="resizer" onMouseDown={handleMouseDown}></div>}
       <div className="file-explorer-content">
         <Routes>
-          <Route path="/file/:fileId" element={<FileContent onFileOperation={handleFileOperation} />} />
+          <Route path="/file/:fileId" element={<FileContent findNodeById={findNodeById} onFileOperation={handleFileOperation} />} />
           <Route path="/" element={<div className="file-explorer-message">Select a file to view its content.</div>} />
         </Routes>
       </div>
