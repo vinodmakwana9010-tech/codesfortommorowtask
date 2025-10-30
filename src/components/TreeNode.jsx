@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import ContextMenu from './ContextMenu';
 import FolderIcon from '../../FolderIcon';
 import FileIcon from '../../FileIcon';
 import CreateFileIcon from '../../CreateFileIcon';
@@ -17,12 +18,14 @@ const doesMatchSearch = (node, searchTerm) => {
   return false;
 };
 
-const TreeNode = ({ node, onFileOperation, level = 0, searchTerm = "" }) => {
+const TreeNode = ({ node, onFileOperation, level = 0, searchTerm = "", clipboard, setClipboard }) => {
   const [isOpen, setIsOpen] = useState(!!searchTerm);
   const [isEditing, setIsEditing] = useState(false);
   const [newName, setNewName] = useState(node.name);
   const [isCreating, setIsCreating] = useState(null); // { type: 'file' | 'folder' }
   const [isDropTarget, setIsDropTarget] = useState(false);
+  const [contextMenu, setContextMenu] = useState({ show: false, x: 0, y: 0 });
+  const location = useLocation();
 
   useEffect(() => {
     setIsOpen(!!searchTerm);
@@ -63,11 +66,6 @@ const TreeNode = ({ node, onFileOperation, level = 0, searchTerm = "" }) => {
     setIsCreating(null);
   };
 
-  const handleDragStart = (e) => {
-    e.dataTransfer.setData('application/json', JSON.stringify({ id: node.id, type: node.type }));
-    e.stopPropagation();
-  };
-
   const handleDragOver = (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -93,11 +91,72 @@ const TreeNode = ({ node, onFileOperation, level = 0, searchTerm = "" }) => {
     setIsDropTarget(false);
     if (node.type === 'folder') {
       const transferData = JSON.parse(e.dataTransfer.getData('application/json'));
-      // एक आइटम को उसी के अंदर नहीं डाला जा सकता
       if (transferData.id !== node.id) {
         onFileOperation('move', transferData.id, node.id);
       }
     }
+  };
+
+  const handleDragStart = (e) => {
+    e.dataTransfer.setData('application/json', JSON.stringify({ id: node.id, type: node.type }));
+    e.stopPropagation();
+  };
+
+  const handleContextMenu = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setContextMenu({ show: true, x: e.clientX, y: e.clientY });
+  };
+
+  const closeContextMenu = () => {
+    setContextMenu({ show: false, x: 0, y: 0 });
+  };
+
+  const handleClipboardOp = (operation) => {
+    setClipboard({ sourceId: node.id, operation });
+    closeContextMenu();
+  };
+
+  const handlePaste = () => {
+    if (clipboard) {
+      if (clipboard.operation === 'copy') {
+        onFileOperation('copy', clipboard.sourceId, node.id);
+      } else if (clipboard.operation === 'cut') {
+        onFileOperation('move', clipboard.sourceId, node.id);
+      }
+    }
+    closeContextMenu();
+  };
+  const contextMenuItems = [
+    ...(node.type === 'folder' ? [
+      { label: 'New File', onClick: () => { closeContextMenu(); startCreate('file'); } },
+      { label: 'New Folder', onClick: () => { closeContextMenu(); startCreate('folder'); } },
+    ] : []),
+    { label: 'Rename', onClick: () => { closeContextMenu(); handleRename(); } },
+    { label: 'Delete', onClick: () => { closeContextMenu(); handleDelete(); }, className: 'delete' },
+  ];
+
+  // Root node पर कुछ एक्शन डिसेबल करने के लिए
+  const getContextMenuItems = () => {
+    if (node.id === 'root') {
+      return [
+        { label: 'New File', onClick: () => { closeContextMenu(); startCreate('file'); } },
+        { label: 'New Folder', onClick: () => { closeContextMenu(); startCreate('folder'); } },
+      ];
+    }
+    return [
+      ...(node.type === 'folder' ? [
+        { label: 'New File', onClick: () => { closeContextMenu(); startCreate('file'); } },
+        { label: 'New Folder', onClick: () => { closeContextMenu(); startCreate('folder'); } },
+        ...(clipboard ? [{ label: 'Paste', onClick: handlePaste }] : []),
+        { type: 'separator' },
+      ] : []),
+      { label: 'Cut', onClick: () => handleClipboardOp('cut') },
+      { label: 'Copy', onClick: () => handleClipboardOp('copy') },
+      { label: 'Rename', onClick: () => { closeContextMenu(); setIsEditing(true); } },
+      { type: 'separator' },
+      { label: 'Delete', onClick: () => { closeContextMenu(); handleDelete(); }, className: 'delete' },
+    ].filter(item => item.type !== 'separator' || (item.type === 'separator' && contextMenuItems.length > 0));
   };
 
   const nodeContent = (
@@ -135,7 +194,7 @@ const TreeNode = ({ node, onFileOperation, level = 0, searchTerm = "" }) => {
     <div
       style={{ paddingLeft: `${level * 20}px` }}
       className="tree-node"
-      draggable="true"
+      draggable={node.id !== 'root'}
       onDragStart={handleDragStart}
     >
       <div
@@ -143,7 +202,9 @@ const TreeNode = ({ node, onFileOperation, level = 0, searchTerm = "" }) => {
         onDragOver={handleDragOver}
         onDragEnter={handleDragEnter}
         onDragLeave={handleDragLeave}
-        onDrop={handleDrop}>
+        onDrop={handleDrop}
+        onContextMenu={handleContextMenu}
+      >
         {nodeContent}
         <div className="tree-node-actions">
           {node.type === 'folder' && !isEditing && (
@@ -156,6 +217,13 @@ const TreeNode = ({ node, onFileOperation, level = 0, searchTerm = "" }) => {
           {!isEditing && <button onClick={handleDelete} title="Delete"><DeleteIcon /></button>}
         </div>
       </div>
+      <ContextMenu
+        x={contextMenu.x}
+        y={contextMenu.y}
+        show={contextMenu.show}
+        onClose={closeContextMenu}
+        items={getContextMenuItems()}
+      />
       {isOpen && node.children && (
         <div>
           {node.children
@@ -167,6 +235,8 @@ const TreeNode = ({ node, onFileOperation, level = 0, searchTerm = "" }) => {
               onFileOperation={onFileOperation}
               level={level + 1}
               searchTerm={searchTerm}
+              clipboard={clipboard}
+              setClipboard={setClipboard}
             />
           ))}
           {isCreating && (

@@ -5,9 +5,10 @@ import TreeNode from './TreeNode';
 import FileContent from './FileContent';
 
 const FileExplorer = () => {
-  const { fileSystem, createFile, deleteItem, renameItem, findNodeById, moveItem, updateFileContent } = useFileSystem();
+  const { fileSystem, createFile, deleteItem, renameItem, findNodeById, moveItem, copyItem, updateFileContent } = useFileSystem() || {};
   const [searchTerm, setSearchTerm] = useState("");
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [clipboard, setClipboard] = useState(null); // { sourceId: string, operation: 'copy' | 'cut' }
   const [sidebarWidth, setSidebarWidth] = useState(280);
 
   const handleFileOperation = (operation, ...args) => {
@@ -19,10 +20,17 @@ const FileExplorer = () => {
         deleteItem(...args);
         break;
       case 'rename':
-        renameItem(...args);
+        renameItem(...args); 
         break;
       case 'move':
         moveItem(...args);
+        setClipboard(null); // Clear clipboard after move
+        break;
+      case 'copy':
+        copyItem(...args);
+        break;
+      case 'update':
+        updateFileContent(...args);
         break;
       case 'updateContent':
         updateFileContent(...args);
@@ -60,7 +68,6 @@ const FileExplorer = () => {
   return (
     <div className={`file-explorer ${isSidebarOpen ? 'sidebar-open' : 'sidebar-closed'}`}>
       <div className="file-explorer-sidebar" style={{ width: isSidebarOpen ? `${sidebarWidth}px` : '0px' }}>
-        <div className="sidebar-content">
           <h1 className="file-explorer-header">File Explorer</h1>
           <input
             type="text"
@@ -69,12 +76,16 @@ const FileExplorer = () => {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
-          <TreeNode node={fileSystem} onFileOperation={handleFileOperation} searchTerm={searchTerm} />
-        </div>
-        <button onClick={toggleSidebar} className="sidebar-toggle" title={isSidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}>
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M9.224 1.553a.5.5 0 0 1 .223.67L6.56 8l2.888 5.776a.5.5 0 1 1-.894.448l-3-6a.5.5 0 0 1 0-.448l3-6a.5.5 0 0 1 .67-.223z"/></svg>
-        </button>
+        <TreeNode
+          node={fileSystem}
+          onFileOperation={handleFileOperation}
+          searchTerm={searchTerm}
+          clipboard={clipboard}
+          setClipboard={setClipboard} />
       </div>
+      <button onClick={toggleSidebar} className="sidebar-toggle" title={isSidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}>
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M9.224 1.553a.5.5 0 0 1 .223.67L6.56 8l2.888 5.776a.5.5 0 1 1-.894.448l-3-6a.5.5 0 0 1 0-.448l3-6a.5.5 0 0 1 .67-.223z"/></svg>
+      </button>
       {isSidebarOpen && <div className="resizer" onMouseDown={handleMouseDown}></div>}
       <div className="file-explorer-content">
         <Routes>

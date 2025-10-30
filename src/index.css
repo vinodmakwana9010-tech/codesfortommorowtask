@@ -34,7 +34,7 @@ body {
   max-width: 50vw;
   padding: 1rem;
   overflow-y: auto;
-  background-color: #1f2937;
+  background-color: #1f2937; /* Slightly lighter sidebar */
   border-right: 1px solid #374151;
   box-shadow: 2px 0 15px rgba(0, 0, 0, 0.2);
   resize: horizontal;
@@ -62,7 +62,7 @@ body {
 
 .sidebar-toggle {
   position: absolute;
-  right: -12px;
+  left: calc(var(--sidebar-width) - 12px);
   top: 50%;
   transform: translateY(-50%);
   z-index: 10;
@@ -79,6 +79,7 @@ body {
   justify-content: center;
   padding: 0;
   transition: background-color 0.2s;
+  transition: left 0.3s ease;
 }
 
 .sidebar-toggle:hover {
@@ -92,6 +93,7 @@ body {
 
 .sidebar-closed .sidebar-toggle svg {
   transform: rotate(180deg);
+  
 }
 
 @media (min-width: 1024px) {
@@ -105,6 +107,12 @@ body {
   font-weight: 700; /* font-bold */
   margin-bottom: 1.5rem; /* mb-6 */
   color: #e5e7eb; /* Brighter header text */
+}
+
+.file-explorer-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .file-explorer-content {
@@ -181,6 +189,22 @@ body {
   text-decoration: none;
 }
 
+.tree-node-content a {
+  color: #9ca3af; /* Softer link color */
+  text-decoration: none;
+  transition: color 0.2s ease-in-out;
+}
+
+.tree-node-item:hover .tree-node-content a,
+.tree-node-item:hover .tree-node-content span {
+  color: white;
+}
+
+.tree-node-item.active .tree-node-content a,
+.tree-node-item.active .tree-node-content span {
+  color: white;
+}
+
 .tree-node {
   margin: 0.25rem 0;
 }
@@ -195,12 +219,12 @@ body {
 }
 
 .tree-node-item:hover {
-  background-color: #374151; /* hover:bg-gray-700 */
+  background-color: #374151; /* A bit darker on hover */
 }
 
 /* Add this class to the active/selected tree node item from your component */
 .tree-node-item.active {
-  background-color: #3b82f6; /* A nice blue for selection */
+  background-color: #3b82f6; /* A nice blue for active item */
   color: white;
 }
 
@@ -305,6 +329,39 @@ body {
   background-color: #3b82f630; /* Blue with opacity */
   outline: 2px dashed #9ca3af; /* text-gray-400 */
   outline-offset: -2px;
+}
+
+.context-menu {
+  position: fixed;
+  background-color: #2d3748;
+  border: 1px solid #4a5568;
+  border-radius: 6px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+  z-index: 1000;
+  min-width: 160px;
+  padding: 0.5rem 0;
+  color: #e5e7eb;
+}
+
+.context-menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.context-menu li {
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.context-menu li:hover {
+  background-color: #374151;
+}
+
+.context-menu li.delete:hover {
+  background-color: #ef4444;
+  color: white;
 }
 
 .search-input {

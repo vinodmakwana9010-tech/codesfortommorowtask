@@ -15,7 +15,7 @@ const FileContent = ({ findNodeById, onFileOperation }) => {
   };
 
   const handleSave = () => {
-    onFileOperation('updateContent', fileId, content);
+    onFileOperation('update', fileId, content);
     alert('File saved!');
   };
 

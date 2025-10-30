@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 
 const initialFileSystem = {
   id: 'root',
@@ -7,22 +7,22 @@ const initialFileSystem = {
   children: [
     {
       id: '1',
-      name: 'public',
+      name: 'project-assets',
       type: 'folder',
       children: [
-        { id: '2', name: 'index.html', type: 'file', content: '<html><body>Hello World</body></html>' },
+        { id: '2', name: 'home.html', type: 'file', content: '<html><body>Welcome to the homepage!</body></html>' },
       ],
     },
     {
       id: '3',
-      name: 'src',
+      name: 'source-code',
       type: 'folder',
       children: [
-        { id: '4', name: 'App.jsx', type: 'file', content: 'import React from "react";' },
-        { id: '5', name: 'main.jsx', type: 'file', content: 'import React from "react";' },
+        { id: '4', name: 'Application.jsx', type: 'file', content: 'import React from "react";\n\nfunction Application() {\n  return <div>My App</div>;\n}' },
+        { id: '5', name: 'index.js', type: 'file', content: 'console.log("hello world");' },
       ],
     },
-    { id: '6', name: 'package.json', type: 'file', content: '{ "name": "my-project" }' },
+    { id: '6', name: 'config.json', type: 'file', content: '{ "name": "my-new-project", "version": "1.0.0" }' },
   ],
 };
 
@@ -41,7 +41,19 @@ const findNodeAndParent = (root, nodeId) => {
 };
 
 export const useFileSystem = () => {
-  const [fileSystem, setFileSystem] = useState(initialFileSystem);
+  const [fileSystem, setFileSystem] = useState(() => {
+    try {
+      const storedFS = localStorage.getItem('fileSystem');
+      return storedFS ? JSON.parse(storedFS) : initialFileSystem;
+    } catch (error) {
+      console.error("Could not read from localStorage", error);
+      return initialFileSystem;
+    }
+  });
+
+  useEffect(() => {
+    localStorage.setItem('fileSystem', JSON.stringify(fileSystem));
+  }, [fileSystem]);
 
   const findNodeById = useCallback((nodeId, root = fileSystem) => {
     if (root.id === nodeId) return root;
@@ -91,11 +103,89 @@ export const useFileSystem = () => {
     });
   }, []);
 
+  const moveItem = useCallback((sourceId, destinationId) => {
+    setFileSystem(currentFileSystem => {
+      const newFS = JSON.parse(JSON.stringify(currentFileSystem));
+
+      let sourceNode = null;
+      let sourceParent = null;
+
+      // Find source node and its parent
+      function findSource(node, parent) {
+        if (node.id === sourceId) {
+          sourceNode = node;
+          sourceParent = parent;
+          return;
+        }
+        if (node.children) {
+          for (const child of node.children) {
+            findSource(child, node);
+            if (sourceNode) return;
+          }
+        }
+      }
+      findSource(newFS, null);
+
+      if (!sourceNode || !sourceParent) return currentFileSystem;
+
+      const destinationNode = findNodeById(destinationId, newFS);
+
+      if (!destinationNode || destinationNode.type !== 'folder' || destinationNode.id === sourceParent.id) {
+        return currentFileSystem;
+      }
+
+      const sourceIndex = sourceParent.children.findIndex(child => child.id === sourceId);
+      sourceParent.children.splice(sourceIndex, 1);
+      destinationNode.children.push(sourceNode);
+
+      return newFS;
+    });
+  }, [findNodeById]);
+
+  const updateFileContent = useCallback((fileId, content) => {
+    setFileSystem(currentFileSystem => {
+      const newFS = JSON.parse(JSON.stringify(currentFileSystem));
+      // findNodeById is not safe to use on newFS if it's not memoized with it
+      // but for this case, it should be fine as we are creating a new object each time.
+      const file = findNodeById(fileId, newFS);
+      if (file && file.type === 'file') {
+        file.content = content;
+      }
+      return newFS;
+    });
+  }, [findNodeById]);
+
+  const copyItem = useCallback((sourceId, destinationId) => {
+    setFileSystem(currentFileSystem => {
+      const newFS = JSON.parse(JSON.stringify(currentFileSystem));
+      const sourceNode = findNodeById(sourceId, newFS);
+      const destinationNode = findNodeById(destinationId, newFS);
+
+      if (!sourceNode || !destinationNode || destinationNode.type !== 'folder') {
+        return currentFileSystem;
+      }
+
+      function deepCloneWithNewIds(node) {
+        const newNode = { ...node, id: Date.now().toString() + Math.random() };
+        if (node.children) {
+          newNode.children = node.children.map(deepCloneWithNewIds);
+        }
+        return newNode;
+      }
+
+      const clonedNode = deepCloneWithNewIds(sourceNode);
+      destinationNode.children.push(clonedNode);
+      return newFS;
+    });
+  }, [findNodeById]);
+
   return {
     fileSystem,
     findNodeById,
     createFile,
     deleteItem,
     renameItem,
+    moveItem,
+    copyItem,
   };
 };
