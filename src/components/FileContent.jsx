@@ -1,9 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 
-const FileContent = ({ findNodeById, onFileOperation }) => {
+const findNodeById = (root, nodeId) => {
+  if (root.id === nodeId) return root;
+  if (root.children) {
+    for (const child of root.children) {
+      const found = findNodeById(child, nodeId);
+      if (found) return found;
+    }
+  }
+  return null;
+};
+
+const FileContent = ({ onFileOperation }) => {
   const { fileId } = useParams();
-  const file = findNodeById(fileId);
+  const file = useSelector(state => findNodeById(state.fileSystem, fileId));
   const [content, setContent] = useState(file?.content || '');
 
   useEffect(() => {
