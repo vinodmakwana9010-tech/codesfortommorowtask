@@ -186,6 +186,7 @@ export const useFileSystem = () => {
     deleteItem,
     renameItem,
     moveItem,
-    copyItem,
+    updateFileContent,
+    copyItem
   };
 };

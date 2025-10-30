@@ -115,6 +115,12 @@ body {
   gap: 0.5rem;
 }
 
+.header-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: #9ca3af;
+}
+
 .file-explorer-content {
   flex-grow: 1;
 }

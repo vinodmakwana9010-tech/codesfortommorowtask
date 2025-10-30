@@ -68,7 +68,13 @@ const FileExplorer = () => {
   return (
     <div className={`file-explorer ${isSidebarOpen ? 'sidebar-open' : 'sidebar-closed'}`}>
       <div className="file-explorer-sidebar" style={{ width: isSidebarOpen ? `${sidebarWidth}px` : '0px' }}>
-          <h1 className="file-explorer-header">File Explorer</h1>
+          <h1 className="file-explorer-header">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="icon header-icon">
+              <path d="M19.5 21a3 3 0 0 0 3-3V9a3 3 0 0 0-3-3h-5.25a3 3 0 0 0-2.625.432l-4.243 4.242a3 3 0 0 1-4.242 0l-1.273-1.273a.75.75 0 0 0-1.06 1.06l1.273 1.273a4.5 4.5 0 0 0 6.364 0l4.243-4.242a1.5 1.5 0 0 1 1.06-.432H19.5z" />
+              <path d="M5.25 4.5c-1.518 0-2.75 1.232-2.75 2.75v10.5c0 1.518 1.232 2.75 2.75 2.75h10.5c.836 0 1.579-.37 2.098-.97l-8.598-8.598a.75.75 0 0 0-1.06-1.06L5.25 15.375v-2.625a.75.75 0 0 0-1.5 0v2.625c0 .134.011.265.032.393a.75.75 0 0 0 1.436.234V7.25c0-.69.56-1.25 1.25-1.25h3.375a.75.75 0 0 0 0-1.5H5.25z" />
+            </svg>
+            File Explorer
+          </h1>
           <input
             type="text"
             placeholder="Search files and folders..."
