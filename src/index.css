@@ -34,10 +34,64 @@ body {
   max-width: 50vw;
   padding: 1rem;
   overflow-y: auto;
-  background-color: #1f2937; /* Slightly lighter sidebar */
+  background-color: #1f2937;
   border-right: 1px solid #374151;
   box-shadow: 2px 0 15px rgba(0, 0, 0, 0.2);
   resize: horizontal;
+  transition: width 0.3s ease, padding 0.3s ease;
+  position: relative;
+  flex-shrink: 0;
+  overflow-x: hidden;
+}
+
+.sidebar-closed .file-explorer-sidebar {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.sidebar-content {
+  min-width: 200px;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+.sidebar-closed .sidebar-content {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.sidebar-toggle {
+  position: absolute;
+  right: -12px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  width: 24px;
+  height: 48px;
+  background-color: #374151;
+  border: 1px solid #4b5563;
+  border-left: none;
+  border-radius: 0 6px 6px 0;
+  color: #9ca3af;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: background-color 0.2s;
+}
+
+.sidebar-toggle:hover {
+  background-color: #4b5563;
+  color: white;
+}
+
+.sidebar-toggle svg {
+  transition: transform 0.3s ease;
+}
+
+.sidebar-closed .sidebar-toggle svg {
+  transform: rotate(180deg);
 }
 
 @media (min-width: 1024px) {
@@ -252,6 +306,7 @@ body {
   outline: 2px dashed #9ca3af; /* text-gray-400 */
   outline-offset: -2px;
 }
+
 .search-input {
   width: calc(100% - 2rem);
   padding: 0.5rem;
