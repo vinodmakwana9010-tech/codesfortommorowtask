@@ -1,12 +1,27 @@
 body {
   margin: 0;
   font-family: "Inter", -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-  background-color: #0f172a; /* A darker, richer blue-gray */
-  color: #d1d5db; /* text-gray-300 */
+  background-color: #111827; /* Even darker background */
+  color: #9ca3af; /* Softer text color */
   overflow: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   transition: background-color 0.3s, color 0.3s;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #1e293b;
+}
+::-webkit-scrollbar-thumb {
+  background: #4b5563;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
 }
 
 .file-explorer {
@@ -19,8 +34,9 @@ body {
   max-width: 50vw;
   padding: 1rem;
   overflow-y: auto;
-  background-color: #1e293b; /* A slightly lighter sidebar background */
-  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+  background-color: #1f2937; /* Slightly lighter sidebar */
+  border-right: 1px solid #374151;
+  box-shadow: 2px 0 15px rgba(0, 0, 0, 0.2);
   resize: horizontal;
 }
 
@@ -34,6 +50,7 @@ body {
   font-size: 1.125rem; /* text-lg */
   font-weight: 700; /* font-bold */
   margin-bottom: 1.5rem; /* mb-6 */
+  color: #e5e7eb; /* Brighter header text */
 }
 
 .file-explorer-content {
@@ -47,7 +64,7 @@ body {
 }
 
 .file-content-container, .file-explorer-message {
-  padding: 2rem;
+  padding: 1.5rem 2rem;
 }
 
 .file-explorer-message {
@@ -58,6 +75,7 @@ body {
   font-size: 1.25rem; /* text-xl */
   font-weight: 700; /* font-bold */
   margin-bottom: 1rem; /* mb-4 */
+  color: #f3f4f6; /* Brighter file name */
 }
 
 .file-content-header {
@@ -66,7 +84,7 @@ body {
   align-items: center;
 }
 
-.file-content-code {
+.file-content-code, .file-content-editor {
   background-color: #1e293b; /* bg-gray-800 */
   padding: 1rem;
   border-radius: 0.25rem; /* rounded */
@@ -74,17 +92,20 @@ body {
   white-space: pre-wrap;
 }
 
+.file-content-editor:focus {
+  outline: 2px solid #4f46e5;
+  border-color: #4f46e5;
+}
+
 .file-content-editor {
   width: 100%;
   height: calc(100vh - 8rem);
-  background-color: #1e293b;
   border: 1px solid #334155;
-  color: white;
-  padding: 1rem;
   box-sizing: border-box;
   font-family: monospace;
   font-size: 1rem;
   resize: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .save-button {
@@ -94,6 +115,7 @@ body {
   padding: 0.5rem 1rem;
   border-radius: 6px;
   cursor: pointer;
+  transition: background-color 0.2s;
 }
 
 .save-button:hover {
@@ -119,12 +141,13 @@ body {
 }
 
 .tree-node-item:hover {
-  background-color: #334155; /* hover:bg-gray-700 */
+  background-color: #374151; /* hover:bg-gray-700 */
 }
 
 /* Add this class to the active/selected tree node item from your component */
 .tree-node-item.active {
-  background-color: #4f46e5; /* A nice indigo for selection */
+  background-color: #3b82f6; /* A nice blue for selection */
+  color: white;
 }
 
 .tree-node-item:hover .tree-node-actions {
@@ -141,7 +164,7 @@ body {
   display: flex;
   gap: 0.5rem;
   opacity: 0;
-  transition: opacity 0.2s ease-in-out;
+  transition: opacity 0.15s ease-in-out;
 }
 
 .tree-node-actions button {
@@ -154,12 +177,13 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background-color 0.2s, color 0.2s;
+  transition: background-color 0.2s, color 0.2s, transform 0.1s;
 }
 
 .tree-node-actions button:hover {
   background-color: #475569; /* bg-gray-600 */
   color: #e5e7eb; /* text-gray-200 */
+  transform: scale(1.15);
 }
 
 .editing-input {
@@ -187,7 +211,7 @@ body {
 }
 
 .folder-icon {
-  color: #f59e0b; /* A richer yellow */
+  color: #f59e0b; /* A rich yellow */
 }
 
 .action-icon {
@@ -196,12 +220,12 @@ body {
 }
 
 .search-input {
-  width: calc(100% - 1.25rem); /* Adjust for padding */
+  width: calc(100% - 1.2rem); /* Adjust for padding */
   padding: 0.5rem;
   margin-bottom: 1rem;
   background-color: #0f172a;
   border: 1px solid #334155;
-  border-radius: 6px;
+  border-radius: 4px;
   color: white;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
@@ -214,7 +238,7 @@ body {
 
 .resizer {
   width: 5px;
-  cursor: col-resize;
+  cursor: ew-resize;
   background-color: #0f172a;
   flex-shrink: 0;
   transition: background-color 0.2s;
@@ -224,7 +248,7 @@ body {
   background-color: #4b5563;
 }
 .drop-target {
-  background-color: #4b5563; /* bg-gray-600 */
+  background-color: #3b82f630; /* Blue with opacity */
   outline: 2px dashed #9ca3af; /* text-gray-400 */
   outline-offset: -2px;
 }
